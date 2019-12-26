@@ -1,18 +1,25 @@
 import socket
 import pickle
-import num_generator
+import functions
 import random
 
-HOST = '127.0.0.1'
-PORT = 8080
+HOST = "127.0.0.1"
+PORT = functions.check_port(input("Порт: "))
+msg=input("Введите сообщение")
 
-while True:
-    sock = socket.socket()
-    sock.connect((HOST, PORT))
-    
-    p, g, a = num_generator.big_num(),num_generator.big_num(),num_generator.big_num()
-    A = num_generator.mod_num(p,g,a)
-    print(p,g,a)
-    sock.send((p, g, A).encode())
-    
+sock = socket.socket()
+sock.connect((HOST, PORT))
+conn, addr = sock.accept()
+
+p,g,a = functions.prime_num(),functions.prime_num(),functions.prime_num()
+A = functions.mod_num(p,g,a)
+
+print("p {}\ng {}\na {}\nA {} ".format(p,g,a,A))
+
+sock.send(pickle.dumps((p,g,A)))
+
+B=pickle.loads(conn.recv(1024))
+K_client=functions.mod_num(B,p,a)
+sock.send(pickle.dumps(K_client)) 
+   
 sock.close()
